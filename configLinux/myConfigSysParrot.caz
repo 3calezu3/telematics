@@ -1,0 +1,617 @@
+*--ARCHIVO DE CONFIGURACION DE ESCRITORIOS--* by C4Z
+
+Ensayo de configuracion del caz.nanorc:
+	-> "_GTK_FRAME_EXTENTS@:c"
+
+1. Instalamos los siguientes paquetes:
+
+	apt install build-essential git vim xcb libxcb-util0-dev libxcb-ewmh-dev libxcb-randr0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libasound2-dev libxcb-xtest0-dev libxcb-shape0-dev
+
+2. Instalamos bspwm y sxhkd:
+
+	cd /home/s4vitar/Descargas/
+	git clone https://github.com/baskerville/bspwm.git
+	git clone https://github.com/baskerville/sxhkd.git
+	cd bspwm/
+	make
+	sudo make install
+	cd ../sxhkd/
+	make
+	sudo make install
+	sudo apt install bspwm
+
+3. Cargamos en bspwm y sxhkd ficheros de ejemplo:
+
+	mkdir ~/.config/bspwm
+	mkdir ~/.config/sxhkd
+	cd /home/s4vitar/Descargas/bspwm/
+	cp examples/bspwmrc ~/.config/bspwm/
+	chmod +x ~/.config/bspwm/bspwmrc 
+	cp examples/sxhkdrc ~/.config/sxhkd/
+
+4. Se edira el sxhkdrc y se configura el tipo de terminal y algunos key bindings:
+	- Se edita el archivo sxhkdrc:
+	nano .config/sxhkd/sxhkdrc
+	- Se compara con el siguiente codigo y las lineas comunes se dejan exactamente igual:
+
+	# ----------------------------------------------------------------------
+	#
+	# wm independent hotkeys
+	#
+
+	# terminal emulator
+	super + Return
+		gnome-terminal
+
+	# program launcher
+	super + d
+		rofi -show run
+
+	# make sxhkd reload its configuration files:
+	super + Escape
+		pkill -USR1 -x sxhkd
+
+	#
+	# bspwm hotkeys
+	#
+
+	# quit/restart bspwm
+	super + alt + {q,r}
+		bspc {quit,wm -r}
+
+	# close and kill
+	super + {_,shift + }w
+		bspc node -{c,k}
+
+	# alternate between the tiled and monocle layout
+	super + m
+		bspc desktop -l next
+
+	# send the newest marked node to the newest preselected node
+	super + y
+		bspc node newest.marked.local -n newest.!automatic.local
+
+	# swap the current node and the biggest node
+	super + g
+		bspc node -s biggest
+
+	#
+	# state/flags
+	#
+
+	# set the window state
+	super + {t,shift + t,s,f}
+		bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
+
+	# set the node flags
+	super + ctrl + {m,x,y,z}
+		bspc node -g {marked,locked,sticky,private}
+
+	#
+	# focus/swap
+	#
+
+	# focus the node in the given direction
+	super + {_,shift + }{Left,Down,Up,Right}
+	       bspc node -{f,s} {west,south,north,east}
+
+	# focus the node for the given path jump
+	super + {p,b,comma,period}
+		bspc node -f @{parent,brother,first,second}
+
+	# focus the next/previous node in the current desktop
+	super + {_,shift + }c
+		bspc node -f {next,prev}.local
+
+	# focus the next/previous desktop in the current monitor
+	super + bracket{left,right}
+		bspc desktop -f {prev,next}.local
+
+	# focus the last node/desktop
+	super + {grave,Tab}
+		bspc {node,desktop} -f last
+
+	# focus the older or newer node in the focus history
+	super + {o,i}
+		bspc wm -h off; \
+		bspc node {older,newer} -f; \
+		bspc wm -h on
+
+	# focus or send to the given desktop
+	super + {_,shift + }{1-9,0}
+		bspc {desktop -f,node -d} '^{1-9,10}'
+
+	#
+	# preselect
+	#
+
+	# preselect the direction
+	super + ctrl + alt + {Left,Down,Up,Right}
+		bspc node -p {west,south,north,east}
+
+
+	# preselect the ratio
+	super + ctrl + {1-9}
+		bspc node -o 0.{1-9}
+
+	# cancel the preselection for the focused node
+	super + ctrl + space
+		bspc node -p cancel
+
+	# cancel the preselection for the focused desktop
+	super + ctrl + alt + space
+		bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
+
+	#
+	# move/resize
+	#
+
+	# expand a window by moving one of its side outward
+	#super + alt + {h,j,k,l}
+	#	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+	# contract a window by moving one of its side inward
+	#super + alt + shift + {h,j,k,l}
+	#	bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
+
+	# move a floating window
+	super + ctrl + {Left,Down,Up,Right}
+		bspc node -v {-20 0,0 20,0 -20,20 0}
+
+	#CUSTOM
+	
+	# Custom move/resize
+	alt + super + {Left,Down,Up,Right}
+		~/.config/bspwm/scripts/bspwm_resize {west,south,north,east}
+	# ----------------------------------------------------------------------
+
+5. Se crea el archivo bspwm_resize:
+
+- Se crea la carperta scripts y el archivo bspwm_resize:
+
+mkdir ~/.config/bspwm/scripts/
+touch ~/.config/bspwm/scripts/bspwm_resize; chmod +x ~/.config/bspwm/scripts/bspwm_resize
+
+- Mediante la siguiente configuración podremos en el futuro controlar las dimensiones de las vetanas, así como modificarlas con atajos de teclado:
+
+# ------------------------------------------------------------------------------------------------
+#!/usr/bin/env dash
+
+if bspc query -N -n focused.floating > /dev/null; then
+	step=20
+else
+	step=100
+fi
+
+case "$1" in
+	west) dir=right; falldir=left; x="-$step"; y=0;;
+	east) dir=right; falldir=left; x="$step"; y=0;;
+	north) dir=top; falldir=bottom; x=0; y="-$step";;
+	south) dir=top; falldir=bottom; x=0; y="$step";;
+esac
+
+bspc node -z "$dir" "$x" "$y" || bspc node -z "$falldir" "$x" "$y"
+# -------------------------------------------------------------------------------------------------
+
+6. Se procede a instalar la polybar. Para ello, instalamos primero los siguientes paquetes:
+
+sudo apt install cmake cmake-data pkg-config python3-sphinx libcairo2-dev libxcb1-dev libxcb-util0-dev libxcb-randr0-dev libxcb-composite0-dev python3-xcbgen xcb-proto libxcb-image0-dev libxcb-ewmh-dev libxcb-icccm4-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-cursor-dev libasound2-dev libpulse-dev libjsoncpp-dev libmpdclient-dev libcurl4-openssl-dev libnl-genl-3-dev
+
+- Para instalar la polybar hacemos lo siguiente:
+cd /home/s4vitar/Descargas/
+git clone --recursive https://github.com/polybar/polybar
+cd polybar/
+mkdir build
+cd build/
+cmake ..
+make -j$(nproc)
+sudo make install
+
+7. Procedemos con la instalación de Picom para ajustar las transparencias (Compton ya está deprecated).
+
+- Primero se instalan los siguientes paquetes, no sin antes actualizar el sistema: RECOMIENDO NO INSTALAR NADA DE ESTO.
+
+sudo apt update
+sudo apt install meson libxext-dev libxcb1-dev libxcb-damage0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-render-util0-dev libxcb-render0-dev libxcb-randr0-dev libxcb-composite0-dev libxcb-image0-dev libxcb-present-dev libxcb-xinerama0-dev libpixman-1-dev libdbus-1-dev libconfig-dev libgl1-mesa-dev libpcre2-dev libevdev-dev uthash-dev libev-dev libx11-xcb-dev libxcb-glx0-dev
+
+- OJO Para que el nuevo git funcione se debe instalar todo esto:
+
+sudo apt update
+sudo apt-get install libconfig-dev libdbus-1-dev libegl-dev libev-dev libgl-dev libepoxy-dev libpcre2-dev libpixman-1-dev libx11-xcb-dev libxcb1-dev libxcb-composite0-dev libxcb-damage0-dev libxcb-dpms0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-present-dev libxcb-randr0-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev libxext-dev meson ninja-build uthash-dev -y
+
+- Este git NO funciona:
+git clone https://github.com/ibhagwan/picom.git
+
+- Se cambias por este: ... Que funciona mas o menos :) Mas adelante hay que hacer unos cambios
+git clone https://github.com/yshui/picom.git
+
+- Posteriormente, se ejecutan los siguientes comandos bajo el directorio ~/Downloads:
+cd picom/
+git submodule update --init --recursive
+meson --buildtype=release . build
+ninja -C build
+sudo ninja -C build install
+
+8. Se Instala el rofi (Posteriormente se instala el tema Nord para Rofi):
+
+sudo apt install rofi
+
+9. En este punto, reiniciamos el equipo y seleccionamos bspwm (Probamos que los shortcuts estén funcionando correctamente).
+
+10. Se configura la terminal
+- Se instalaran las Hack Nerd Fonts, el la ultima version del Firefox, firejail con 'apt install firejail' con el objetivo de lanzar firefox bajo este contexto enjaulado con sxhkd). [Las fuentes de Hack Nerd Fonts deben ir descomprimidas en /usr/local/share/fonts/, una vez hecho hay que ejecutar el comando 'fc-cache -v']
+
+P4S0S:
+
+a. Se abre el rofi con:
+rofi -show run
+
+b. Se instala el ultimo firefox para esto nos hacemos sudo y nos volvemos propietarios de la carpeta /opt Ahi es donde se va amover todo el pinglado...
+sudo su
+cd /
+chown caz:caz opt/
+cd !$ 
+su caz
+mv ~/Downloads/firefox-123.2.1.tar.bz2 .
+tar -xf firefox-123.0.1.tar.bz2
+
+c. Instalamos el firejail
+sudo apt-get install firejail -y
+
+d. Vamos hasta el final del archivo
+nano /home/caz/.config/sxhkd/sxhkdrc
+- Se da win + escape
+
+d. Se escribe el acceso directo para abrir el firefox con el firejail
+#open FireFox
+super + shift + f
+    firejail /opt/firefox/firefox
+
+e. Cambiamos los ajustes del firefox
+- Cambiar el buscado por  duckDuckGo
+- Privacidad quitar usuarios y constrasenas
+- No recordar el historial
+- Reiniciar firefox
+- Borrar el historial
+
+f. Ajustar el terminal
+- Editar/Preferencias de perfil
+- Quitar forma de cursor  I-Beam
+- Quitar la barra de la derecha: scrolling/scrollbar off
+- Quitar la barra de menu: General/Show menu bar
+- Quitar campana: General/Terminal bell
+
+g. instalar las Hack Nerds Fonts
+- Buscar en fireFox Hack Nerds Fonts
+- Fonts Downloads
+- Bajar hasta las Haak Nerd Font y bajarlas
+- Ejecutar:
+sudo su
+cd /usr/local/share/fonts
+mv /home/caz/Downloads/Hack.zip .
+unzip Hack.zip
+rm Hack.zip
+- Abrir Profiles/Profile Preferences con clic derecho sobre un terminal
+- Quitar General/Use the system fixed yseleccionar una fuente.
+
+11. Se instala el addon 'FoxyProxy' para Firefox.
+- Se busca foxyproxy
+- Se selecciona FoxyProxy Standard - Get this Extension for Firefox (en-US)
+- Add to Firefox
+- Estudiar mas el tema. OJO QUE ESTO NO QUEDO BIEN - NO QUEDO OPERANDO!!!
+
+12. Se Configura la privacidad en Firefox y el directorio de descargas principal
+
+ NO SE COMPLETO ESTE PASO!!! 
+
+13. Se instala 'feh' con 'apt install feh' para poder cargar fondos de pantalla.
+
+- Se inicia un recurso de red compartido con windows con el comando impacket que trabaja con la version 2 de samba pero esta vuelta se me sale de control y no fuciona.
+impacket-smbserver smbFolder $(pwd) -smb2support -username caz -passwd caz123
+
+- JAJAJA MUY complejo seguir asi.
+
+- Carga de archivo desde pc en windows: tema pendiente porque toca estudiar todo lo relacionado con el servidor de samba con windows.
+
+- Se debe coseguir la imagen para el fondo, por ahora tengo compartida una carpeta desde windows a traves del virtualbox y probamos la imagen usando:
+
+display /Pictures/hulk.jpg
+
+- Se instala feh y se monta la imagen de fondo
+
+sudo apt install feh -y
+feh --bg-fill Pictures/hulk.jpg
+
+14. Se carga en el archivo bspwmrc justo al final la siguiente línea:
+
+nano ~/.config/bspwm/bspwmrc
+feh --bg-fill ~/Pictures/hulk.jpg
+
+15. Para configurar la Polybar, se clona el siguiente git en 'Downloads':
+
+git clone https://github.com/VaughnValle/blue-sky.git
+
+- Se ejecutan los siguientes comandos :
+
+mkdir ~/.config/polybar
+cd ~/Downloads/blue-sky/polybar/
+cp * -r ~/.config/polybar
+
+- Agregar texto en la utima linea
+echo '~/.config/polybar/./launch.sh' >> ~/.config/bspwm/bspwmrc 
+
+- Agregar las fuentes
+cd fonts
+sudo cp * /usr/share/fonts/truetype/
+fc-cache -v
+
+- Hacemos Windows + Shift + R para cargar la configuración y deberíamos ver la Polybar por arriba.
+
+- Modificar cosas de la polybar
+cd .config/polybar
+cat launch.sh
+- En worksapace se pueden configurar varias cosas como el color de los puntos del modulo del worspace, se busca a modules y se cambia el color de respectivo label... tambien se puede cambiar el caracter que se muestra en el workspace
+nano ~/.config/polybar/workspace.ini
+
+
+16. Para configurar Picom y ajustar las transparencias además de bordeados de ventana, ejecutamos los siguientes pasos:
+
+mkdir ~/.config/picom
+cd ~/.config/picom
+cp ~/Descargas/blue-sky/picom.conf .
+nano picom.conf
+
+- En la linea 214 aprox. se comenta backend = "glx"
+- Se descomenta backend = "xrender"
+- Se comenta todo lo que diga glx
+- Tambien hay que comentar un par lineas que generan errores en la picom:
+  -> "_GTK_FRAME_EXTENTS@:c"
+  -> refresh-rate = 0
+- Se agrega lo siguiente al final del archivo para quitar la trasparencia del rofi:
+opacity-rule = [
+        "100:class_g = 'Rofi'"
+];
+- Se abre bspwmrc y se hacen los siguientes cambios:
+nano .config/bspwm/bspwmrc
+
+- Se cambia el valor de la siguiente linea, para eliminar completamente los border y permitir el efecto de redondeo se vea bien:
+bspc config border_width 0
+
+- Poner la siguiente linea para que haga seguiemiento del raton para cambiar de ventana SUPER UTIL:
+bspc config focus_follows_pointer true
+
+- Al final del archivo se agrega la siguiente linea para se ejecute el picom y las ventanes se vea tranparentes:
+picom &
+
+17. Se configuran los colores de la polybar y se agregan otras las paletas deseadas.
+- Cambiar cosas en la polybar:
+- Se abre el archivo ~/.config/polybar/current.ini
+- El orden del archivo es: 
+  -> Bar Main: inicio
+  -> Los Bar: linea 156
+  -> Separator: linea 227
+  -> Aplications Settings: linea 362
+  -> Modules: linea 404
+
+- Se puede cambiar nombre de la barra
+  -> En el apartado dedicado a MODULES se cambia el content que le corresponde a la barra caz, en ese punto se pone el texto que se quiere que aparezca. En este punto se puso CAZ
+
+- Para cambiar colores y tamano de la barra:
+  -> Se busca la linea 156. Ahi inican todas las barras y se baja hasta la barra caz.
+
+- Se organizan los nombres de las barras actuales 
+  -> Se cambia:
+			1. log por caz
+			2. secondary por cazDate
+			3. top por cazIndicators
+			4. primary por cazSys "Este se lanza con current.ini"
+			5. primary por cazWorkSpaces "Este se lanza con workspace"
+
+  -> Se abre el launch.sh para hacer los cambios  			
+    nano .config/polybar/launch.sh
+  
+  -> Se abre current para hacer los cambios que le corresponde
+    nano .config/polybar/current.ini
+
+  -> Se baja hasta la linea 153 y se duplican las barras una a una se van verificando los cambios
+
+  -> Se abre worspace para hacer los cambios que le corresponde
+    nano .config/polybar/workspace.ini
+
+  -> Se baja hasta la linea 153 y se duplican las barras una a una se van verificando los cambios
+
+  -> Se eliminan los duplicados, uno por uno y se va verificando. 
+
+  -> Se organiza el orden de las barras en el archivo "current.ini"
+  -> OJO: tenga en cuenta que la ultimo barra debe tener comentado la linea: ";wm-restack = bspwm" para evitar un error de duplicado, mas adelante se ESTUDIA el tema suando se LIMPIEN los respectivos archivos.  
+
+- Creacion de una nueva barra IPv4 que muestra la IP local:
+	-> Se abre el archivo current.ini:
+		nano .config/polybar/current.ini
+
+	-> Se crea una barra a partir de la barra cazDate se copia y se pega y se modifica el nombre de la barra, el width el offset y como modulo centra se pone a ethernetStatus	
+		
+	-> Despues de la linea 404 se agrega el modulo para la batta IPv4con la siguiente estructura: Toca esperar a ver si cuando se active mas de un adaptador se enrreda la pita con mas de una una IP pero eso se puede probar con el comando hostname:
+		[module/ethernetStatus]
+		type = custom/script
+		interval = 2
+		format-foreground = ${color.white}
+		label-font = 1
+		exec = echo "󰲐 $(hostname -I)"
+
+- Estudio y mejoras de la barra cazIndicators
+	P E N D I E N T E
+	 
+- Estudio y mejoras de la barra cazSys
+	-> Se abre el archivo current.ini
+		nano .config/polybar/current.ini
+	-> Se verifica la barra cazSys despues de la linea 157
+		modules-center = sysmenu
+	-> Se busca el modulo sysmenu despues de la linea 405, casi al final de l archivo y se revisa la linea:
+		click-left = ~/.config/polybar/scripts/powermenu_alt
+	-> Esta linea induca que se debe abrir el archivo powermenu_alt
+		nano ~/.config/polybar/scripts/powermenu_alt
+	-> En este archivo se verifica que el menu se construye con base al rofi_command y se abre el archivo powermenu_alt.rasi
+		nano ~/.config/polybar/scripts/themes/powermenu_alt.rasi		
+	-> Por ahora solo se le cambio el tamano width y height 
+ 
+#-------------------------------------------------------------#
+DEJAMOS ESTE TEMA A B I E R T O MIENTRAS ORDENAMOS LOS ARCHIVOS		
+#-------------------------------------------------------------#
+#
+#- Hay otra forma de hacerlo usando un script en bash:
+#	-> Se crea la carpeta bin en .config:
+# 		mkdir ~/.config/bin
+# 
+# 	-> En la carpeta bin se crea el archivo binario.sh y se abre:
+# 		touch ~/.config/bin/binario.sh
+# 		nano ~/.config/bin/binario.sh
+# 
+# 	-> En el archiivo binario.sh se pega el siguiente script:
+# 		#!/bin/sh
+# 
+# 		echo "%{F#2495e7} %{F#ffffff}$(ifconfig | grep "inet" | awk '{print $2}')%{u-}"
+# 
+# nf-md-ip_network
+# 
+# 		echo "%{F#2495e7} %{F#ffffff}$(/usr/sbin/ifconfig eth0 | grep "inet " | awk '{print $2}')%{u-}"
+# 	
+# #!/bin/sh
+# 
+# local_interface=$(route | awk '/^default/{print $NF}')
+# local_ip=$(ip addr show "$local_interface" | grep -w "inet" | awk '{ print $2; }' | sed 's/\/.*$//')
+# 
+# echo "# $local_ip"
+# 
+# 
+#   -> En el archivo current.ini se agrega un nuevo modulo despues de la linea 404 con la siguiente estructura:
+# 		[module/tumodulo]
+# 		type = custom/script
+# 		interval = 2
+# 		exec = ~/.config/bin/binario.sh
+# 
+# Por ejemplo, para el módulo del ethernet_status:
+# 
+# 
+# Para el módulo de hackthebox_status.sh:
+# 
+# #!/bin/sh
+# 
+# IFACE=$(/usr/sbin/ifconfig | grep tun0 | awk '{print $1}' | tr -d ':')
+# 
+# if [ "$IFACE" = "tun0" ]; then
+# 	echo "%{F#1bbf3e} %{F#ffffff}$(/usr/sbin/ifconfig tun0 | grep "inet " | awk '{print $2}')%{u-}"
+# else
+# 	echo "%{F#1bbf3e}%{u-} Disconnected"
+# fi
+# 
+#-------------------------------------------------------------#
+                F I N   T E M P O R A L	DE ESTE TEMA	
+#-------------------------------------------------------------#
+
+18. Se configura el tema Nord de Rofi:
+
+- Se crea un directorio para configurar el rofi
+	mkdir -p ~/.config/rofi/themes
+
+- Se copia la configuraci[on desde la carpeta blue-sky
+	cp ~/Downloads/blue-sky/nord.rasi ~/.config/rofi/themes/
+
+- Se ejecuta el "rofi-theme-selector" y se selecciona el tema Nord
+	rofi-theme-selector
+- Se selecciona "fancy.rasi" y se sale con Alt+A
+
+19. Se instala slim y slimlock
+- Son aplicaciones para bloquear la pantalla
+- Se instalan los paquetes previos y el slim
+	sudo apt-get update
+	sudo apt-get install slim libpam0g-dev libxrandr-dev libfreetype6-dev libimlib2-dev libxft-dev -y
+
+- Se ejecutan los siquietes comandos:
+	cd ~/Downloads/
+	git clone https://github.com/joelburget/slimlock.git
+	cd slimlock/
+	sudo make
+	sudo make install
+	cd ~/Descargas/blue-sky/slim
+	sudo cp slim.conf /etc/
+	sudo cp slimlock.conf /etc
+	sudo cp -r default /usr/share/slim/themes
+NADA QUE HACER NO COMPILA MAS ADELANTE BUSCARE OTRA OPCION PARA EL SLIM, ADEMAS ES MUY VIEJO.
+
+	
+
+Si queremos cambiar la imagen del panel, nos vamos a la ruta '/usr/share/slim/themes/default' y retocamos el archivo 'panel.png'.
+
+20. Reiniciamos el sistema y una vez arrancado, incorporamos en el archivo 'bspwmrc' la siguiente línea para arreglar el cursor:
+
+xsetroot -cursor_name left_ptr &
+
+21. Instalamos la powerlevel10k en zsh
+
+22. Creamos enlace simbólico de la zshrc para root
+
+23. Cambiamos el tipo de shell por defecto tanto para root como para el usuario con bajos privilegios
+
+usermod --shell /usr/bin/zsh tuUsuario
+usermod --shell /usr/bin/zsh root
+
+24. Retocamos el archivo .p10k.zsh para adecuarlo a nuestro gusto
+
+Para el de root, podemos ir a 'POWERLEVEL9K_CONTEXT_ROOT_TEMPLATE' para asignar el Hashtag.
+
+Comentamos la siguiente línea:
+
+# POWERLEVEL9K_CONTEXT_PREFIX='%246Fwith '
+
+Para evitar un pequeño problema de permisos a la hora de desde el usuario root migrar con 'su' al usuario con bajos privilegios, ejecutamos los siguientes comandos:
+
+chown s4vitar:s4vitar /root
+chown s4vitar:s4vitar /root/.cache -R
+chown s4vitar:s4vitar /root/.local -R
+
+25. Instalamos bat, lsd, fzf y ranger
+
+26. Instalar el plugin sudo
+
+27. Instalamos nvim con el theme nord
+
+cd .config/nvim/
+wget https://github.com/arcticicestudio/nord-vim/archive/master.zip
+unzip master.zip 
+rm master.zip 
+mv nord-vim-master/colors/ .
+rm -r nord-vim-master/
+
+Añadimos al archivo 'init.vim' la línea 'colorscheme nord' justo al final.
+
+wget https://raw.githubusercontent.com/Necros1s/lotus/master/lotus.vim
+wget https://raw.githubusercontent.com/Necros1s/lotus/master/lotusbar.vim
+wget https://raw.githubusercontent.com/Necros1s/lotus/master/init.vim (Quitamos las líneas del plug)
+
+Añadimos justo al final del 'init.vim' la línea 'syntax on' para la detección de sintaxis.
+
+[TODO ESTE PROCESO HAY QUE HACERLO TAMBIÉN COMO EL USUARIO ROOT]
+
+Incorporamos posteriormente las siguientes líneas al final del zshrc para que al salir del nvim no se quede el cursor en modo Block:
+
+# Change cursor shape for different vi modes.
+function zle-keymap-select {
+  if [[ $KEYMAP == vicmd ]] || [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q'
+  elif [[ $KEYMAP == main ]] || [[ $KEYMAP == viins ]] || [[ $KEYMAP = '' ]] || [[ $1 = 'beam' ]]; then
+    echo -ne '\e[5 q'
+  fi
+}
+zle -N zle-keymap-select
+
+# Start with beam shape cursor on zsh startup and after every command.
+zle-line-init() { zle-keymap-select 'beam'}
+
+28. Instalamos Oh My Tmux
+
+29. Whichsystem.py
+
+https://github.com/Akronox/WichSystem.py
+
+30. fastTCPScan.go

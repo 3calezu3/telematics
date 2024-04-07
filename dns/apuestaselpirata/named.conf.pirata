@@ -1,0 +1,12 @@
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+
+zone "apuestaselpirata.com" {
+  type master;
+  file "directo.apuestaselpirata.com";
+};
+zone "0.0.10.inaddr.arpa" {
+  type master;
+  file "inverso.10.0.0";
+};

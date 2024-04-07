@@ -1,0 +1,13 @@
+$ORIGIN 0.0.10.inaddr.arpa.
+$TTL 86400 ; 1 dia
+@ IN SOA apuestaselpirata.com admin@apuestaselpirata.com (
+  2001; serie
+  6H; refrescamiento (6 horas)
+  1H; reintentos (1 hora)
+  2W; expira (2 semanas)
+  3H; mínimo cache (3 horas)
+)
+  IN  NS  dns.apuestaselpirata.com.
+1 IN  PTR dns.apuestaselpirata.com.
+2 IN  PTR www.apuestaselpirata.com.
+3 IN  PTR mail.apuestaselpirata.com.

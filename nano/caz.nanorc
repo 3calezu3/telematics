@@ -1,0 +1,49 @@
+## Syntax highlighting for CazDoc files.
+
+## Original author:  Carlos Alejandro Zuluaga Toro
+## License:  GPL version 3 or newer
+
+syntax "CazDoc" "\.caz$"
+comment "# "
+
+# Palabras con mayuscula con numeros y _
+color brightyellow "\<[A-Z_][0-9A-Z_]*\>"
+
+# Palabras con mayuscula con numeros
+#color brightmagenta "\<[A-Z][0-9A-Z]*\>"
+
+#Los items van de amarillo
+color yellow "- .*"
+
+#Los subitems van de verde oscuro
+color #0A0 "-> .*"
+
+#Los items de letras y van de magenta
+color magenta "\<^[a-z.]\>.*"
+
+# Una letra minuscula seguida de punto
+color brightyellow "\<^[a-z.]\>"
+
+# Solo Mayusculas
+color red "\<[A-Z][A-Z]*\>"
+
+# TITULO:
+color italic,brightred start="\*--" end="--\*"
+
+# Una sola letra mayuscula
+color brightwhite "\<[A-Z]\>"
+
+#numeral
+color brightcyan "^[0-9].*"
+#Cualquier numero queda de naraja
+color orange "[0-9]*"
+
+# Comments.
+color brightblue "//.*"
+color brightblue "#.*"
+color brightblue start="/\*" end="\*/"
+
+# Intermments
+color brightmagenta start="\"" end="\""
+
+color #FF0 "[+!$&();<=>\`|]"

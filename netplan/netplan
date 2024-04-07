@@ -1,0 +1,16 @@
+network:
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 10.146.192.102/24
+      nameservers:
+        addresses: [10.100.6.4, 10.100.6.5]
+      routes:
+        - to: default
+          via: 10.46.192.1
+      dhcp6: no
+      addresses:
+        -beba:cafe::0007/64
+        
+  vesrion: 2
