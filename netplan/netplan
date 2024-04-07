@@ -13,4 +13,4 @@ network:
       addresses:
         -beba:cafe::0007/64
         
-  vesrion: 2
+  version: 2
