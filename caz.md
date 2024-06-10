@@ -37,10 +37,9 @@
 | Dato 4                 |      Dato 5        |             Dato 6   |
 
 ## Código:
-
-.. code-block:: python
-
+``` python
 nombre = "Jhon"
+```
 
 ## Párrafos:
 Para separar dos párrafos se deja una línea en blanco entre ellos, este sería el párrafo 1.
