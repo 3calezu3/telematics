@@ -38,7 +38,7 @@
 
 ## Código:
 
-```c++
+```code-block:: c++
 var nombre = "Jhon";
 ```
 
