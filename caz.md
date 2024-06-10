@@ -38,9 +38,10 @@
 
 ## Código:
 
-```code-block:: c++
+.. code-block:: c++
+
 var nombre = "Jhon";
-```
+
 
 ## Párrafos:
 Para separar dos párrafos se deja una línea en blanco entre ellos, este sería el párrafo 1.
