@@ -38,10 +38,9 @@
 
 ## Código:
 
-.. code-block:: c++
+.. code-block:: python
 
-var nombre = "Jhon";
-
+nombre = "Jhon"
 
 ## Párrafos:
 Para separar dos párrafos se deja una línea en blanco entre ellos, este sería el párrafo 1.
