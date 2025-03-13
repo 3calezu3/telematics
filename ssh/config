@@ -1,0 +1,36 @@
+Host Caz
+	HostName 54.158.96.234
+	User ubuntu
+	IdentityFile caz.pem
+Host Bastion
+	HostName 35.175.109.97
+	User ubuntu
+	IdentityFile bastion.pem
+Host DNS
+	User ubuntu
+	HostName 10.0.137.172
+	IdentityFile DNS.pem
+	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
+Host Server1
+	User ubuntu
+	HostName 10.0.131.114
+	IdentityFile server1.pem
+	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
+Host Server2
+	User ubuntu
+	Hostname 10.0.130.88
+	IdentityFile server2.pem
+	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
+Host Server
+	User caz
+	Hostname 192.168.20.81
+	IdentityFile /d/"OneDrive - UPB"/5_TemasDeEstudio/24_linuxRedes/linux/llaves/server
+Host Server21
+	User caz
+	Hostname 192.168.20.81
+#	IdentityFile /c/Users/carlo/.ssh/server2
+	IdentityFile server2
+Host windows-private
+	HostName 10.0.135.21
+	User Administrator
+	ProxyJump bastion 
