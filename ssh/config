@@ -3,22 +3,22 @@ Host Caz
 	User ubuntu
 	IdentityFile caz.pem
 Host Bastion
-	HostName 35.175.109.97
+	HostName 3.235.3.19
 	User ubuntu
 	IdentityFile bastion.pem
 Host DNS
 	User ubuntu
-	HostName 10.0.137.172
+	HostName 10.0.0.141
 	IdentityFile DNS.pem
 	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
 Host Server1
 	User ubuntu
-	HostName 10.0.131.114
+	HostName 10.0.0.139
 	IdentityFile server1.pem
 	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
 Host Server2
 	User ubuntu
-	Hostname 10.0.130.88
+	Hostname 10.0.0.142
 	IdentityFile server2.pem
 	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
 Host Server
