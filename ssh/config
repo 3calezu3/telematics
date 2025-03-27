@@ -1,26 +1,28 @@
-Host Caz
-	HostName 54.158.96.234
+# Principal AWS
+Host bastion
+	HostName 52.70.60.141
 	User ubuntu
-	IdentityFile caz.pem
-Host Bastion
-	HostName 3.235.3.19
+	IdentityFile http.pem
+Host web1
 	User ubuntu
-	IdentityFile bastion.pem
-Host DNS
+	HostName 10.0.0.158
+	IdentityFile http.pem
+	ProxyCommand ssh -p 22 -W %h:%p bastion
+Host web2
 	User ubuntu
-	HostName 10.0.0.141
-	IdentityFile DNS.pem
-	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
-Host Server1
+	HostName 10.0.0.243
+	IdentityFile http.pem
+	ProxyCommand ssh -p 22 -W %h:%p bastion
+Host web3
 	User ubuntu
-	HostName 10.0.0.139
-	IdentityFile server1.pem
-	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
-Host Server2
-	User ubuntu
-	Hostname 10.0.0.142
-	IdentityFile server2.pem
-	ProxyCommand ssh -i bastion.pem -p 22 -W %h:%p Bastion
+	HostName 10.0.0.178
+	IdentityFile http.pem
+	ProxyCommand ssh -p 22 -W %h:%p bastion
+Host win_dns
+	User administrator
+	HostName 10.0.0.140
+	ProxyJump bastion
+# Red VirtualBOX
 Host Server
 	User caz
 	Hostname 192.168.20.81
@@ -34,3 +36,14 @@ Host windows-private
 	HostName 10.0.135.21
 	User Administrator
 	ProxyJump bastion 
+# Otra RED AWS
+Host bastion-tortillas
+	HostName ec2-3-239-172-67.compute-1.amazonaws.com
+	User ubuntu
+	IdentityFile tortillas.pem
+Host dns-tortillas
+	User ubuntu
+	HostName 10.0.0.138
+	IdentityFile tortillas.pem
+	ProxyCommand ssh -i tortillas.pem -p 22 -W %h:%p bastion-tortillas
+
