@@ -1,12 +1,13 @@
 # Principal AWS
 Host bastion
-	HostName 52.70.60.141
+	HostName 54.146.27.125
 	User ubuntu
-	IdentityFile http.pem
-Host web1
+	IdentityFile telematica.pem
+	ForwardAgent yes
+Host privada
 	User ubuntu
-	HostName 10.0.0.158
-	IdentityFile http.pem
+	HostName 10.0.0.133
+	IdentityFile telematica.pem
 	ProxyCommand ssh -p 22 -W %h:%p bastion
 Host web2
 	User ubuntu
@@ -18,10 +19,12 @@ Host web3
 	HostName 10.0.0.178
 	IdentityFile http.pem
 	ProxyCommand ssh -p 22 -W %h:%p bastion
-Host win_dns
-	User administrator
-	HostName 10.0.0.140
-	ProxyJump bastion
+#Host mail
+#	HostName 10.0.0.134
+#	User Administrator
+#	ProxyCommand ssh -L 5000:10.0.0.134:3389 bastion
+
+
 # Red VirtualBOX
 Host Server
 	User caz
@@ -36,6 +39,7 @@ Host windows-private
 	HostName 10.0.135.21
 	User Administrator
 	ProxyJump bastion 
+
 # Otra RED AWS
 Host bastion-tortillas
 	HostName ec2-3-239-172-67.compute-1.amazonaws.com
